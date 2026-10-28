@@ -28,7 +28,7 @@ jobs:
       run: |
         pytest test_app.py
 
-    # 3. Docker Build & Push (Uses Git commit SHA as unique tag)
+    # 3. Docker Build & Push
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
       with:
@@ -42,18 +42,18 @@ jobs:
         push: true
         tags: ${{ secrets.DOCKER_USERNAME }}/calculator-app:${{ github.sha }}
 
-    # 4. Kubernetes Deployment
-    - name: Set up Kubectl
-      uses: azure/setup-kubectl@v3
+    # 4. Create Kubernetes Cluster in GitHub Actions
+    - name: Create Kind Kubernetes Cluster
+      uses: helm/kind-action@v1.8.0
 
-    - name: Set Kubernetes Context
-      uses: azure/k8s-set-context@v3
-      with:
-        method: kubeconfig
-        kubeconfig: ${{ secrets.KUBECONFIG }}
-
+    # 5. Deploy to Kubernetes
     - name: Deploy to Kubernetes Cluster
       run: |
         sed -i 's|DOCKER_USERNAME/calculator-app:IMAGE_TAG|${{ secrets.DOCKER_USERNAME }}/calculator-app:${{ github.sha }}|g' k8s/deployment.yaml
         kubectl apply -f k8s/deployment.yaml
         kubectl apply -f k8s/service.yaml
+        
+    - name: Verify Kubernetes Deployment
+      run: |
+        kubectl get pods
+        kubectl get svc
