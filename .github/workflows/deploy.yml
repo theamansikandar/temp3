@@ -1,0 +1,65 @@
+name: Kubernetes CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Stage 1 & 2: Source Code Checkout & Version Control
+    - name: Checkout Source Code
+      uses: actions/checkout@v4
+
+    # Stage 3: Continuous Integration (Dependencies & Automated Tests)
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run Automated Tests
+      run: |
+        pytest test_app.py
+
+    # Stage 4: Build & Push Docker Image
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build and Push Docker Image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: ${{ secrets.DOCKER_USERNAME }}/calculator:${{ github.sha }}
+
+    # Stage 5: Kubernetes Deployment
+    - name: Set up Kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.28.0'
+
+    - name: Deploy to Kubernetes Cluster
+      env:
+        KUBECONFIG_DATA: ${{ secrets.KUBECONFIG }}
+      run: |
+        sed -i "s|DOCKER_USERNAME/calculator:IMAGE_TAG|${{ secrets.DOCKER_USERNAME }}/calculator:${{ github.sha }}|g" k8s/deployment.yaml
+        
+        if [ -n "$KUBECONFIG_DATA" ]; then
+          mkdir -p ~/.kube
+          echo "$KUBECONFIG_DATA" | base64 --decode > ~/.kube/config
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+        else
+          echo "KUBECONFIG secret not set. Manifest rendered with unique tag ${{ github.sha }}."
+          cat k8s/deployment.yaml
+        fi
