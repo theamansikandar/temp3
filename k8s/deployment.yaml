@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: calculator-deployment
+  name: calculator
 spec:
   replicas: 1
   selector:
@@ -13,7 +13,7 @@ spec:
         app: calculator
     spec:
       containers:
-        - name: calculator
-          image: DOCKER_USERNAME/calculator-app:IMAGE_TAG
-          ports:
-            - containerPort: 5000
+      - name: calculator
+        image: YOUR_DOCKERHUB_USERNAME/calculator-app:v1
+        ports:
+        - containerPort: 5000
