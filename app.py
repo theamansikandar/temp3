@@ -1,53 +1,31 @@
+from flask import Flask, jsonify, request
+
+app = Flask(__name__)
+
 def add(a, b):
     return a + b
 
 def subtract(a, b):
     return a - b
 
-def multiply(a, b):
-    return a * b
+@app.route('/')
+def menu():
+    return jsonify({
+        "status": "online",
+        "available_operations": ["add", "subtract"]
+    })
 
-def divide(a, b):
-    if b == 0:
-        raise ValueError("Cannot divide by zero")
-    return a / b
+@app.route('/add', methods=['GET'])
+def calculate_add():
+    a = float(request.args.get('a', 0))
+    b = float(request.args.get('b', 0))
+    return jsonify({"operation": "addition", "result": add(a, b)})
 
-def show_menu():
-    print("\n--- Menu-Driven Calculator ---")
-    print("1. Addition")
-    print("2. Subtraction")
-    print("3. Multiplication")
-    print("4. Division")
-    print("5. Exit")
+@app.route('/subtract', methods=['GET'])
+def calculate_subtract():
+    a = float(request.args.get('a', 0))
+    b = float(request.args.get('b', 0))
+    return jsonify({"operation": "subtraction", "result": subtract(a, b)})
 
-def main():
-    while True:
-        show_menu()
-        choice = input("Enter choice (1-5): ")
-        if choice in ['1', '2', '3', '4']:
-            try:
-                num1 = float(input("Enter first number: "))
-                num2 = float(input("Enter second number: "))
-            except ValueError:
-                print("Invalid input! Please enter numeric values.")
-                continue
-
-            if choice == '1':
-                print(f"Result: {add(num1, num2)}")
-            elif choice == '2':
-                print(f"Result: {subtract(num1, num2)}")
-            elif choice == '3':
-                print(f"Result: {multiply(num1, num2)}")
-            elif choice == '4':
-                try:
-                    print(f"Result: {divide(num1, num2)}")
-                except ValueError as e:
-                    print(e)
-        elif choice == '5':
-            print("Exiting calculator.")
-            break
-        else:
-            print("Invalid choice, try again.")
-
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)

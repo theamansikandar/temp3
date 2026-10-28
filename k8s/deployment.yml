@@ -2,8 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: calculator-deployment
-  labels:
-    app: calculator
 spec:
   replicas: 1
   selector:
@@ -16,5 +14,6 @@ spec:
     spec:
       containers:
       - name: calculator
-        image: theamansikandar/calculator:IMAGE_TAG
-        imagePullPolicy: Always
+        image: DOCKER_USERNAME/calculator-app:IMAGE_TAG
+        ports:
+        - containerPort: 5000
