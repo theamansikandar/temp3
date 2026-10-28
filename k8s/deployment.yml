@@ -16,5 +16,5 @@ spec:
     spec:
       containers:
       - name: calculator
-        image: DOCKER_USERNAME/calculator:IMAGE_TAG
+        image: theamansikandar/calculator:IMAGE_TAG
         imagePullPolicy: Always
