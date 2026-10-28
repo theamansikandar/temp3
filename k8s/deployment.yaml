@@ -16,4 +16,4 @@ spec:
       - name: calculator
         image: YOUR_DOCKERHUB_USERNAME/calculator-app:v1
         ports:
-        - containerPort: 5000
+        - containerPort: 5001
