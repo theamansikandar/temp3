@@ -13,7 +13,7 @@ spec:
         app: calculator
     spec:
       containers:
-      - name: calculator
-        image: DOCKER_USERNAME/calculator-app:IMAGE_TAG
-        ports:
-        - containerPort: 5000
+        - name: calculator
+          image: DOCKER_USERNAME/calculator-app:IMAGE_TAG
+          ports:
+            - containerPort: 5000
